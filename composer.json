@@ -1,13 +1,17 @@
 {
-    "name": "dirtsimple/postmark",
-    "description": "Sync WP content from Markdown files",
+    "name": "greenleafadvancement/postmark",
+    "description": "Sync WP content from Markdown files (CommonMark v2 compatible fork)",
     "type": "wp-cli-package",
-    "homepage": "https://github.com/dirtsimple/postmark/",
+    "homepage": "https://github.com/greenleafadvancement/postmark/",
     "license": "MIT",
     "authors": [
         {
             "name": "PJ Eby",
             "homepage": "https://github.com/pjeby"
+        },
+        {
+            "name": "Greenleaf Advancement",
+            "homepage": "https://greenleafadvancement.com"
         }
     ],
     "keywords": [
@@ -31,14 +35,14 @@
         }
     },
     "require": {
+        "php": ">=8.1",
         "dirtsimple/clean-yaml": "^0.1",
         "dirtsimple/imposer": "dev-master",
         "wp-cli/wp-cli": "^2.11",
         "wp-cli/entity-command": "^2.8",
         "rarst/wpdatetime": "^0.3.0",
-        "league/commonmark": "^1.6",
-        "twig/twig": "^2.4",
-        "symfony/yaml": "^3.4",
-        "php": ">=7.1"
+        "league/commonmark": "^2.7",
+        "twig/twig": "^3.0",
+        "symfony/yaml": "^5.4 || ^6.0 || ^7.0"
     }
 }

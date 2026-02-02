@@ -1,11 +1,18 @@
 <?php
 namespace dirtsimple\Postmark;
 
-use League\CommonMark\Block;
-use League\CommonMark\CommonMarkConverter;
-use League\CommonMark\Environment;
-use League\CommonMark\Extension;
-use League\CommonMark\Inline;
+use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\Autolink\AutolinkExtension;
+use League\CommonMark\Extension\Table\TableExtension;
+use League\CommonMark\Extension\TaskList\TaskListExtension;
+use League\CommonMark\Extension\Attributes\AttributesExtension;
+use League\CommonMark\Extension\Strikethrough\StrikethroughExtension;
+use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
+use League\CommonMark\MarkdownConverter;
+use League\CommonMark\Extension\ExtensionInterface;
+use League\CommonMark\Parser\Block\BlockStartParserInterface;
+use League\CommonMark\Parser\Inline\InlineParserInterface;
 
 class Formatter {
 
@@ -15,7 +22,7 @@ class Formatter {
 		static $converter = null;
 		$converter = $converter ?: static::formatter();
 		$markdown = apply_filters('postmark_markdown', $value, $doc, $field);
-		$html = $converter->convertToHtml($markdown);
+		$html = $converter->convert($markdown)->getContent();
 		return apply_filters('postmark_html', $html, $doc, $field);
 	}
 
@@ -24,24 +31,27 @@ class Formatter {
 			'renderer' => array(
 				'block_separator' => "",
 				'inner_separator' => "",
-				'line_break' => "",
-			),
-			'extensions' => array(
-                'League\CommonMark\Extension\Autolink\AutolinkExtension' => null,
-                'League\CommonMark\Extension\Table\TableExtension' => null,
-                'League\CommonMark\Extension\TaskList\TaskListExtension' => null,
-				'League\CommonMark\Extension\Attributes\AttributesExtension' => null,
-                'League\CommonMark\Extension\Strikethrough\StrikethroughExtension' => null,
-				'League\CommonMark\Extension\SmartPunct\SmartPunctExtension' => null,
-				'dirtsimple\Postmark\ShortcodeParser' => null,
+				'soft_break' => "",
 			),
 		);
-		$env = Environment::createCommonMarkEnvironment();
-		$cfg = apply_filters('postmark_formatter_config', $cfg, $env);
 
-		static::addExtensions($env, $cfg['extensions']);
-		unset( $cfg['extensions'] );
-		return new CommonMarkConverter($cfg, $env);
+		$extensions = array(
+			AutolinkExtension::class => null,
+			TableExtension::class => null,
+			TaskListExtension::class => null,
+			AttributesExtension::class => null,
+			StrikethroughExtension::class => null,
+			SmartPunctExtension::class => null,
+			ShortcodeStartParser::class => null,
+		);
+
+		$env = new Environment($cfg);
+		$env->addExtension(new CommonMarkCoreExtension());
+
+		$extensions = apply_filters('postmark_formatter_extensions', $extensions, $env);
+		static::addExtensions($env, $extensions);
+
+		return new MarkdownConverter($env);
 	}
 
 	protected static function addExtensions($env, $exts) {
@@ -54,10 +64,10 @@ class Formatter {
 
 	protected static function addExtension($env, $name, $ext) {
 		switch (true) {
-		case $ext instanceof Extension\ExtensionInterface                 : $env->addExtension($ext);         break;
-		case $ext instanceof Block\Parser\BlockParserInterface            : $env->addBlockParser($ext);       break;
-		case $ext instanceof Inline\Parser\InlineParserInterface          : $env->addInlineParser($ext);      break;
-		default: throw new Error(__('Unrecognized extension type: %s', 'postmark'), $name);
+		case $ext instanceof ExtensionInterface           : $env->addExtension($ext);         break;
+		case $ext instanceof BlockStartParserInterface    : $env->addBlockStartParser($ext);  break;
+		case $ext instanceof InlineParserInterface        : $env->addInlineParser($ext);      break;
+		default: throw new \Exception(sprintf(__('Unrecognized extension type: %s', 'postmark'), $name));
 		}
 	}
 
