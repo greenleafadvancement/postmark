@@ -36,7 +36,7 @@
     },
     "require": {
         "php": ">=8.1",
-        "dirtsimple/clean-yaml": "^0.1",
+        "greenleafadvancement/clean-yaml": "dev-master",
         "dirtsimple/imposer": "dev-master",
         "wp-cli/wp-cli": "^2.11",
         "wp-cli/entity-command": "^2.8",
