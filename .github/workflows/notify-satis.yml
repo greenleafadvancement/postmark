@@ -1,0 +1,45 @@
+# Template: Add this to each package repository
+# Location: .github/workflows/notify-satis.yml
+#
+# Required secrets:
+#   SATIS_TRIGGER_TOKEN - Personal access token with repo scope
+#                         (or fine-grained token with actions:write on satis repo)
+#
+# Replace greenleafadvancement/postmark with the actual composer package name
+# Example: greenleafadvancement/fs-grid
+
+name: Notify Satis
+
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Satis rebuild
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.SATIS_TRIGGER_TOKEN }}
+          repository: greenleafadvancement/satis
+          event-type: package-updated
+          client-payload: '{"package": "greenleafadvancement/postmark", "ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+
+      - name: Summary
+        run: |
+          echo "## Satis Rebuild Triggered" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package:** greenleafadvancement/postmark" >> $GITHUB_STEP_SUMMARY
+          echo "- **Ref:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **SHA:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
