@@ -7,7 +7,12 @@ class Project {
 
 	protected static $docs=array();
 
-	protected $prefix_len=0, $base, $loader, $pdir, $prototypes=array();
+	protected int $prefix_len = 0;
+	protected string $base;
+	protected $loader;
+	protected string $pdir;
+	protected $env;
+	protected array $prototypes = array();
 
 	protected function __construct($base) {
 		$prefix = dirname($base);

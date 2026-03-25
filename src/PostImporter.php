@@ -12,6 +12,9 @@ use WP_Error;
 
 class PostImporter {
 
+	protected $doc;
+	protected $postinfo;
+
 	static function register_kind($kind) {
 		global $wpdb;
 		$filter = PostModel::posttype_exclusion_filter();
