@@ -20,7 +20,12 @@ class PostExporter {
 
 		$mdf->ID = $post->guid;
 		$mdf->Title = $post->post_title;
-		$mdf->Slug = $post->post_name;
+		// Empty post_name is common on drafts/auto-drafts; an empty slug makes
+		// Kind::export() throw a fatal "did not supply a slug" error, which under a
+		// batch/single-bootstrap export aborts the ENTIRE run on one slugless post.
+		// Fall back to the post ID so every post is always exportable. The
+		// postmark_export_slug filter below can still override this value.
+		$mdf->Slug = ( $post->post_name !== '' ) ? $post->post_name : (string) $post->ID;
 
 		if ( $user = get_user_by('id', $post->post_author) )
 			$mdf->Author = $user->user_email;
